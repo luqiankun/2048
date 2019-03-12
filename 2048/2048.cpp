@@ -1,5 +1,8 @@
-﻿// 2048.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
+﻿// C++ 控制台版本2048  
+// 运行环境windows，因为包含了Windows.h（用来延时，可用其他方法替代）
+// 所以linux下 <Windows.h>需要调整替换
+// Email->lqkisme@163.com
+// Author : lqkisme
 
 #include "pch.h"
 #include <iostream>
@@ -20,11 +23,12 @@ public:
 	void Print(); //打印棋盘
 	bool Input();//获取输入
 	bool AddBoard();//添加棋子
-	void Up();
+	void Up();//上下左右按键事件，都类似，以左按键为母版
 	void Down();
 	void Right();
 	void Left();
-	void Restart();
+	void Restart();//复位
+	void RUN();
 	void Delay(int msec);
 	bool WIN();//判断是否赢了
 	bool LOSE();//判断是否输了
@@ -51,12 +55,10 @@ void Game::Print()
 	}
 	cout << "I-----I-----I-----I-----I" << endl;
 	cout << "Your Scroe is:" << this->Scroe << endl;
-	for (size_t i = 0; i < this->Tips.size(); i++)
-	{
-		cout << this->Tips[i] ;
-	}
+	cout << this->Tips;
 	cout <<  endl;
 }
+
 bool Game::Input()
 {
 	int ch;
@@ -65,7 +67,7 @@ bool Game::Input()
 		switch (ch)
 		{
 		case 27:return true;break;
-		case 113:return true; break;
+		case 113:return true; this->Tips = { "退出" }; break;
 		case 114: this->Restart(); break;//复位
 		case 80:this->Down(); break;//xia
 		case 75: this->Left(); break;//zuo
@@ -75,14 +77,13 @@ bool Game::Input()
 			return false;
 			break;
 		}
-	
 	}
-	
 	return false;
 }
+
 bool Game::LOSE()
 {
-	bool lose=true;
+	bool lose=true;//标志位
 	//没有0出现
 	for (size_t i = 0; i < size(this->BoardList); i++)
 	{
@@ -103,12 +104,12 @@ bool Game::LOSE()
 	{
 		for (size_t j = 0; j < size(this->BoardList[0]) - 1; j++)
 		{
-			if (this->BoardList[i][j]== this->BoardList[i][j+1])
+			if (this->BoardList[i][j]== this->BoardList[i][j+1]&& this->BoardList[i][j]!=0)
 			{
 				return false;
 				break;
 			}
-			if (this->BoardList[j][i]== this->BoardList[j+1][i])
+			if (this->BoardList[j][i]== this->BoardList[j+1][i]&& this->BoardList[j][i]!=0)
 			{
 				lose = false;
 				return false;
@@ -118,6 +119,7 @@ bool Game::LOSE()
 	}
 	if (lose)
 	{
+		this->Tips = { " YOU LOSE !!!" };
 		return true;
 	}
 }
@@ -130,10 +132,10 @@ bool Game::WIN()
 			//出现2048，即为赢
 			if (this->BoardList[i][j]==2048)
 			{
+				this->Tips = { "YOU WIN !!!" };
 				return true;
 				break;
-				
-			}
+							}
 			else
 			{
 				return false;
@@ -143,9 +145,8 @@ bool Game::WIN()
 }
 bool Game::AddBoard()
 {
-	int choice[] = { 4, 2, 2, 4, 2, 2, 2, 2 };//可以调节2和4出现的频率
+	int choice[] = { 4, 2, 4, 4, 2, 2, 2, 2 };//可以调节2和4出现的频率
 	//srand(time(0));
-
 	int temp = (rand() % (size(choice) - 0)) + 0;
 	int p1 = rand() % 4;
 	int p2 = rand() % 4;
@@ -160,37 +161,150 @@ bool Game::AddBoard()
 }
 void Game::Up()
 {
-	for (size_t i = 0; i < size(this->BoardList); i++)
+	for (size_t i = 0; i < size(this->BoardList[0]); i++)
 	{
-		for (size_t j = 0; j < size(this->BoardList[0]); j++)
+		for (size_t t = 0; t < size(this->BoardList[0]); t++)
 		{
-
+			for (size_t j = 0; j < size(this->BoardList) - 1; j++)
+			{
+				if (this->BoardList[j][i] == 0)
+				{
+					if (this->BoardList[j + 1][i]!=0)
+					{
+						this->ADD = true;
+					}
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j + 1][i];
+					this->BoardList[j + 1][i] = temp;
+				}
+			}
+		}
+		// 2、合并同类项
+		for (size_t j = 0; j < size(this->BoardList[i]) - 1; j++)
+		{
+			// 2 2 2 2 ->4 0 2 2 ->4 0 4 0 
+			// 2 2 2 0 -> 4 0 2 0 
+			if (this->BoardList[j][i] == this->BoardList[j + 1][i])
+			{
+				if (this->BoardList[j][i]!=0)
+				{
+					this->ADD = true;
+				}
+				this->BoardList[j][i] = this->BoardList[j][i] * 2;
+				this->Scroe = this->BoardList[j][i] + this->Scroe;
+				this->BoardList[j + 1][i] = 0;
+			}
+		}
+		//3、 再次移动0元素
+		for (size_t t = 0; t < size(this->BoardList[0]); t++)
+		{
+			for (size_t j = 0; j < size(this->BoardList[t]) - 1; j++)
+			{
+				// 0 2 0 2 -> 2 2 0 0
+				if (this->BoardList[j][i] == 0)
+				{
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j + 1][i];
+					this->BoardList[j + 1][i] = temp;
+				}
+			}
 		}
 	}
-	this->AddBoard();
+	if (this->LOSE() || this->WIN())
+	{}
+	else
+	{
+		if (this->ADD)
+		{
+			this->AddBoard();
+			this->ADD = false;
+		}
+	}
 }
+
 void Game::Down()
 {
-		
-	this->AddBoard();
+	for (size_t i = 0; i < size(this->BoardList[0]); i++)
+	{
+		for (size_t t = size(this->BoardList[0]); t>0; t--)
+		{
+			for (size_t j = size(this->BoardList) - 1; j >0; j--)
+			{
+				if (this->BoardList[j][i] == 0)
+				{
+					if (this->BoardList[j - 1][i] != 0)
+					{
+						this->ADD = true;
+					}
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j - 1][i];
+					this->BoardList[j - 1][i] = temp;
+				}
+			}
+		}
+		// 2、合并同类项
+		for (size_t j = size(this->BoardList[i]) - 1; j>0; j--)
+		{
+			// 2 2 2 2 ->4 0 2 2 ->4 0 4 0 
+			// 2 2 2 0 -> 4 0 2 0 
+			if (this->BoardList[j][i] == this->BoardList[j - 1][i])
+			{
+				if (this->BoardList[j][i] != 0)
+				{
+					this->ADD = true;
+				}
+				this->BoardList[j][i] = this->BoardList[j][i] * 2;
+				this->Scroe = this->BoardList[j][i] + this->Scroe;
+				this->BoardList[j - 1][i] = 0;
+			}
+		}
+		//3、 再次移动0元素
+		for (size_t t = size(this->BoardList[0]); t >0; t--)
+		{
+			for (size_t j = size(this->BoardList[t]) - 1; j >0; j--)
+			{
+				// 0 2 0 2 -> 2 2 0 0
+				if (this->BoardList[j][i] == 0)
+				{
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j - 1][i];
+					this->BoardList[j - 1][i] = temp;
+				}
+			}
+		}
+	}
+	if (this->LOSE() || this->WIN())
+	{}
+	else
+	{
+		if (this->ADD)
+		{
+			this->AddBoard();
+			this->ADD = false;
+		}
+	}
 }
+
 void Game::Left()
 {
 	for (size_t j= 0; j < size(this->BoardList); j++)
 	{
-		//1、先移动每行0元素
+		//1、先移动每行0元素（出现0就交换）,最多交换size(this->BoardList)次
 		for (size_t t = 0; t < size(this->BoardList); t++)
 		{
-			
 			for (size_t i = 0; i < size(this->BoardList[t]) - 1; i++)
 			{
-				// 0 2 0 2 -> 2 2 0 0
-				if (this->BoardList[t][i] == 0)
+				// 0 2 0 2 ->2 0 2 0
+				if (this->BoardList[j][i] == 0)
 				{
-					auto temp = this->BoardList[t][i];
-					this->BoardList[t][i] = this->BoardList[t][i + 1];
-					this->BoardList[t][i + 1] = temp;
-
+					// 发生了移动，添加棋子标志位置真
+					if (this->BoardList[j][i + 1]!=0)
+					{
+						this->ADD = true;
+					}
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j][i + 1];
+					this->BoardList[j][i + 1] = temp;
 				}
 			}
 		}
@@ -201,39 +315,42 @@ void Game::Left()
 			// 2 2 2 0 -> 4 0 2 0 
 			if (this->BoardList[j][i]== this->BoardList[j][i+1])
 			{
+				// 发生了合并，添加棋子标志位置真
+				if (this->BoardList[j][i]!=0)
+				{
+					this->ADD = true;
+				}
 				this->BoardList[j][i] = this->BoardList[j][i] * 2;
 				this->Scroe = this->BoardList[j][i] + this->Scroe;
 				this->BoardList[j][i + 1] = 0;
 			}
-
 		}
-		//3、 再次移动0元素
+		//3、 再次移动0元素 4 0 2 0 -> 4 2 0 0 
 		for (size_t t = 0; t < size(this->BoardList); t++)
 		{
-
 			for (size_t i = 0; i < size(this->BoardList[t]) - 1; i++)
 			{
 				// 0 2 0 2 -> 2 2 0 0
-				if (this->BoardList[t][i] == 0)
+				if (this->BoardList[j][i] == 0)
 				{
-					auto temp = this->BoardList[t][i];
-					this->BoardList[t][i] = this->BoardList[t][i + 1];
-					this->BoardList[t][i + 1] = temp;
-
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j][i + 1];
+					this->BoardList[j][i + 1] = temp;
 				}
 			}
 		}
 	}
 	//赢了或者输了就不再添加
 	if (this->LOSE()||this->WIN())
-	{
-
-	}
+	{}
 	else
 	{
-		this->AddBoard();
+		if (this->ADD)
+		{
+			this->AddBoard();
+			this->ADD = false;
+		}
 	}
-	
 }
 
 void Game::Right()
@@ -243,60 +360,62 @@ void Game::Right()
 		//1、先移动每行0元素
 		for (size_t t = size(this->BoardList); t >0;t--)
 		{
-
 			for (size_t i = size(this->BoardList[t]) - 1; i>0; i--)
 			{
-				// 0 2 0 2 -> 2 2 0 0
-				if (this->BoardList[t][i] == 0)
+				if (this->BoardList[j][i] == 0)
 				{
-					auto temp = this->BoardList[t][i];
-					this->BoardList[t][i] = this->BoardList[t][i - 1];
-					this->BoardList[t][i - 1] = temp;
-
+					if (this->BoardList[j][i - 1]!=0)
+					{
+						this->ADD = true;
+					}
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j][i - 1];
+					this->BoardList[j][i - 1] = temp;
 				}
 			}
 		}
 		// 2、合并同类项
 		for (size_t i = size(this->BoardList[j]) - 1; i >0; i--)
-		{
-			// 2 2 2 2 -> 0 4 0 4 
-			// 0 2 2 2  -> 0 2 0 4
+		{	
 			if (this->BoardList[j][i] == this->BoardList[j][i - 1])
 			{
+				if (this->BoardList[j][i] != 0)
+				{
+					this->ADD = true;
+				}
 				this->BoardList[j][i] = this->BoardList[j][i] * 2;
 				this->Scroe = this->BoardList[j][i] + this->Scroe;
 				this->BoardList[j][i - 1] = 0;
 			}
-
 		}
 		//3、 再次移动0元素
 		for (size_t t = size(this->BoardList); t > 0; t--)
 		{
-
 			for (size_t i = size(this->BoardList[t]) - 1; i > 0; i--)
 			{
 				// 0 2 0 2 -> 2 2 0 0
-				if (this->BoardList[t][i] == 0)
+				if (this->BoardList[j][i] == 0)
 				{
-					auto temp = this->BoardList[t][i];
-					this->BoardList[t][i] = this->BoardList[t][i - 1];
-					this->BoardList[t][i - 1] = temp;
-
+					auto temp = this->BoardList[j][i];
+					this->BoardList[j][i] = this->BoardList[j][i - 1];
+					this->BoardList[j][i - 1] = temp;
 				}
 			}
 		}
 	}
 	//赢了或者输了就不再添加
 	if (this->LOSE() || this->WIN())
-	{
-
-	}
+	{}
 	else
 	{
-		this->AddBoard();
-	}
-	
+		if (this->ADD)
+		{
+			this->AddBoard();
+			this->ADD = false;
+		}
+	}	
 }
+
 void Game::Restart()
 {
 	this->Scroe = 0;//初始分数 
@@ -312,8 +431,38 @@ void Game::Restart()
 	this->AddBoard();
 }
 
-
-
+void Game::RUN()
+{
+	this->Restart();
+	while (1)
+	{
+		system("cls");
+		if (this->LOSE())
+		{
+			break;
+		}
+		if (this->WIN())
+		{
+			break;
+		}
+		if (this->Input())
+		{
+			break;
+		}
+		if (this->LOSE())
+		{
+			break;
+		}
+		if (this->WIN())
+		{
+			break;
+		}
+		this->Print();
+		Sleep(100);//屏幕刷新时间 100ms
+	}
+	cout << this->Tips;
+	system("pause");
+}
 void Game::Delay(int msec)
 {
 	clock_t now = clock();
@@ -323,41 +472,6 @@ void Game::Delay(int msec)
 int main()
 {
 	Game a;
-	a.Restart();
-	while (1)
-	{
-		system("cls");
-		if (a.LOSE())
-		{
-			a.Tips = { "YOU LOSE!!!" };
-			break;
-		}
-		if (a.WIN())
-		{
-			a.Tips = { "YOU WIN!!!" };
-			break;
-		}
-		if (a.Input())
-		{
-			break;
-		}
-
-		if (a.LOSE())
-		{
-			break;
-		}
-		if (a.WIN())
-		{
-			break;
-		}
-		a.Print();
-		Sleep(260);
-	}
-	
-	cout << a.Tips;
-	
-	//system("pause");
-
-	
+	a.RUN();
 }
 
