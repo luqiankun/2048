@@ -18,7 +18,7 @@ public:
 	int Scroe = 0;//初始分数 
 	bool ADD = false;//是否添加棋子
 	int BoardList[4][4] = { 0 };
-	string Tips = { "nothing" };
+	string Tips = "提示：" ;
 
 	void Print(); //打印棋盘
 	bool Input();//获取输入
@@ -55,8 +55,10 @@ void Game::Print()
 	}
 	cout << "I-----I-----I-----I-----I" << endl;
 	cout << "Your Scroe is:" << this->Scroe << endl;
-	cout << this->Tips;
-	cout <<  endl;
+	cout << this->Tips << endl;;
+	cout << "请按" << "↑" << "↓" << "←" << "→" << "移动"<<endl;
+	cout <<"按Q或者Esc退出" << endl;
+	cout << "按R复位" << endl;
 }
 
 bool Game::Input()
@@ -66,8 +68,8 @@ bool Game::Input()
 		ch = _getch();//使用_getch()函数获取按下的键值
 		switch (ch)
 		{
-		case 27:return true;break;
-		case 113:return true; this->Tips = { "退出" }; break;
+		case 27:return true;
+		case 113: &this->Tips.assign("退出！"); return true; 
 		case 114: this->Restart(); break;//复位
 		case 80:this->Down(); break;//xia
 		case 75: this->Left(); break;//zuo
@@ -75,7 +77,7 @@ bool Game::Input()
 		case 77: this->Right(); break;//右
 		default:
 			return false;
-			break;
+
 		}
 	}
 	return false;
@@ -93,9 +95,7 @@ bool Game::LOSE()
 			if (this->BoardList[i][j] == 0)
 			{
 				lose = false;
-				return false;
-				break;
-				
+				return false;		
 			}
 		}
 	}
@@ -107,19 +107,17 @@ bool Game::LOSE()
 			if (this->BoardList[i][j]== this->BoardList[i][j+1]&& this->BoardList[i][j]!=0)
 			{
 				return false;
-				break;
 			}
 			if (this->BoardList[j][i]== this->BoardList[j+1][i]&& this->BoardList[j][i]!=0)
 			{
 				lose = false;
 				return false;
-				break;
 			}
 		}
 	}
 	if (lose)
 	{
-		this->Tips = { " YOU LOSE !!!" };
+		&this->Tips.assign(" YOU LOSE !!!");
 		return true;
 	}
 }
@@ -132,10 +130,9 @@ bool Game::WIN()
 			//出现2048，即为赢
 			if (this->BoardList[i][j]==2048)
 			{
-				this->Tips = { "YOU WIN !!!" };
+				&this->Tips.assign("YOU WIN !!!");
 				return true;
-				break;
-							}
+			}
 			else
 			{
 				return false;
@@ -420,6 +417,7 @@ void Game::Restart()
 {
 	this->Scroe = 0;//初始分数 
 	this->ADD = false;//是否添加棋子
+	this->Tips.assign("提示：");
 	for (size_t i = 0; i < size(this->BoardList); i++)
 	{
 		for (size_t j = 0; j < size(this->BoardList[0]); j++)
