@@ -6,59 +6,57 @@
 
 #include "pch.h"
 #include <iostream>
+#include<cstdlib>
 #include <string>
 #include <iomanip>
 #include <conio.h>
 #include <Windows.h>
+#include <ctime>
+#include "2048.h"
 using namespace std;
-class Game
+
+Game::Game()
 {
-	
-public:
-	int Scroe = 0;//初始分数 
-	bool ADD = false;//是否添加棋子
-	int BoardList[4][4] = { 0 };
-	string Tips = "提示：" ;
-
-	void Print(); //打印棋盘
-	bool Input();//获取输入
-	bool AddBoard();//添加棋子
-	void Up();//上下左右按键事件，都类似，以左按键为母版
-	void Down();
-	void Right();
-	void Left();
-	void Restart();//复位
-	void RUN();
-	void Delay(int msec);
-	bool WIN();//判断是否赢了
-	bool LOSE();//判断是否输了
-};
-
+	this->Tips = { "提示：" };
+}
 void Game::Print()
 {
+	time_t tt = time(NULL);
+	tm t;//时间结构体
+	localtime_s(&t, &tt);//获取时间
+	int hour, sec, min;
+	hour = t.tm_hour;
+	min = t.tm_min;
+	sec =t.tm_sec;
+	cout <<"         This time is  "<<hour<<"时"<<min<<"分"<<sec<<"秒"<<endl;
+	cout << "            2048 made by lqkisme" << endl;
 	for (size_t i = 0; i < size(this->BoardList); i++)
 	{
-		cout << "I-----I-----I-----I-----I" << endl;
+		cout << "          |-----|-----|-----|-----|" << endl;
+		cout << "          ";
 		for (size_t j = 0; j < size(this->BoardList[0]); j++)
 		{
+			
 			if (this->BoardList[i][j] != 0)
 			{
-				cout <<" "<<setw(4)<< setiosflags(ios::left) <<this->BoardList[i][j]<<" ";
+				cout <<"| "<<setw(3)<< setiosflags(ios::left)
+					<<this->BoardList[i][j]<<" ";
 				
 			}
 			else
 			{
-				cout<< " "<<setw(4) << setiosflags(ios::left) << " "<<" ";
+				cout<< "| "<<setw(3) << setiosflags(ios::left) << " "<<" ";
 			}
 		}
-		cout << endl;
+		cout << "|"<<endl;
 	}
-	cout << "I-----I-----I-----I-----I" << endl;
-	cout << "Your Scroe is:" << this->Scroe << endl;
-	cout << this->Tips << endl;;
-	cout << "请按" << "↑" << "↓" << "←" << "→" << "移动"<<endl;
-	cout <<"按Q或者Esc退出" << endl;
-	cout << "按R复位" << endl;
+	cout << "          |-----|-----|-----|-----|" << endl<<endl;
+	cout << "    分数:" << this->Scroe << endl;
+	cout << "《--------------------请按照提示进行游戏----------------------》" << endl;
+	cout << this->Tips << endl<<endl;;
+	cout <<"     请按" << "↑" << "↓" << "←" << "→" << "移动"<<endl;
+	cout <<"     按Q或者Esc退出" << endl;
+	cout <<"     按R复位" << endl;
 }
 
 bool Game::Input()
@@ -86,7 +84,7 @@ bool Game::Input()
 bool Game::LOSE()
 {
 	bool lose=true;//标志位
-	//没有0出现
+	//出现0，表示还未结束
 	for (size_t i = 0; i < size(this->BoardList); i++)
 	{
 		for (size_t j = 0; j < size(this->BoardList[0]); j++)
@@ -99,7 +97,7 @@ bool Game::LOSE()
 			}
 		}
 	}
-	//其次横竖相邻元素不相等
+	//横竖相邻元素相等未结束
 	for (size_t i = 0; i < size(this->BoardList) - 1; i++)
 	{
 		for (size_t j = 0; j < size(this->BoardList[0]) - 1; j++)
@@ -120,6 +118,7 @@ bool Game::LOSE()
 		&this->Tips.assign(" YOU LOSE !!!");
 		return true;
 	}
+	return false;
 }
 bool Game::WIN()
 {
@@ -139,6 +138,7 @@ bool Game::WIN()
 			}
 		}
 	}
+	return false;
 }
 bool Game::AddBoard()
 {
@@ -147,7 +147,7 @@ bool Game::AddBoard()
 	int temp = (rand() % (size(choice) - 0)) + 0;
 	int p1 = rand() % 4;
 	int p2 = rand() % 4;
-	while (this->BoardList[p1][p2] != 0)
+	while (this->BoardList[p1][p2] != 0)//位置已有数字，重新选取
 	{
 		p1 = rand() % 4;
 		p2 = rand() % 4;
@@ -431,9 +431,39 @@ void Game::Restart()
 
 void Game::RUN()
 {
+	system("color 70");//背景颜色 白底黑字
+	HANDLE hOutput;
+	COORD coord = { 0,0 };
+	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	//创建新的缓冲区
+	HANDLE hOutBuf = CreateConsoleScreenBuffer(
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		CONSOLE_TEXTMODE_BUFFER,
+		NULL
+	);
+
+	//设置新的缓冲区为活动显示缓冲
+	SetConsoleActiveScreenBuffer(hOutBuf);
+
+	//隐藏两个缓冲区的光标
+	CONSOLE_CURSOR_INFO cci;
+	cci.bVisible = 0;
+	cci.dwSize = 1;
+	SetConsoleCursorInfo(hOutput, &cci);
+	SetConsoleCursorInfo(hOutBuf, &cci);
+
+	//双缓冲处理显示
+	DWORD bytes = 0;
+	char data[1600];
+	system("color 70");
+	SetConsoleTitleA("游戏：2048");
 	this->Restart();
 	while (1)
 	{
+		system("color 70");
 		system("cls");
 		if (this->LOSE())
 		{
@@ -449,17 +479,41 @@ void Game::RUN()
 		}
 		if (this->LOSE())
 		{
-			break;
+			string S;
+			cout << this->Tips<<endl;
+			cout << "输入yes并按回车继续，输入其他指令并按回车退出！";
+			getline(cin,S);
+			if (S =="yes")
+			{
+				this->Restart();
+			}
+			else
+			{
+					break;
+			}
 		}
 		if (this->WIN())
 		{
-			break;
+			string S;
+			cout << this->Tips << endl;
+			cout << "输入yes并按回车继续，输入其他指令并按回车退出！" << endl;
+			cout << "输入指令：";
+			getline(cin, S);
+			if (S == "yes")
+			{
+				this->Restart();
+			}
+			else
+			{
+				break;
+			}
 		}
 		this->Print();
-		Sleep(100);//屏幕刷新时间 100ms
+		ReadConsoleOutputCharacterA(hOutput, data, 1600, coord, &bytes);
+		WriteConsoleOutputCharacterA(hOutBuf, data, 1600, coord, &bytes);
 	}
 	cout << this->Tips;
-	system("pause");
+	//system("pause");
 }
 void Game::Delay(int msec)
 {
