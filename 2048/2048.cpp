@@ -509,8 +509,8 @@ void Game::RUN()
 			}
 		}
 		this->Print();
-		ReadConsoleOutputCharacterA(hOutput, data, 1600, coord, &bytes);
-		WriteConsoleOutputCharacterA(hOutBuf, data, 1600, coord, &bytes);
+		ReadConsoleOutputCharacterA(hOutput, data, 1600, coord, &bytes);//读取缓冲区
+		WriteConsoleOutputCharacterA(hOutBuf, data, 1600, coord, &bytes);//显示缓冲区
 	}
 	cout << this->Tips;
 	//system("pause");
