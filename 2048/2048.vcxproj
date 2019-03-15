@@ -154,6 +154,7 @@
     <ClInclude Include="2048.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="resource1.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="2048.cpp" />
@@ -168,7 +169,7 @@
     <ResourceCompile Include="2048.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\Users\Administrator.USER-20190116HF\Desktop\1.ico" />
+    <Image Include="1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
