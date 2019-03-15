@@ -1,6 +1,6 @@
 ﻿// C++ 控制台版本2048  
-// 运行环境windows，因为包含了Windows.h（用来延时，可用其他方法替代）
-// 所以linux下 <Windows.h>需要调整替换
+// 运行环境windows，因为包含了Windows.h 和Windows控制台API
+// 所以linux下需要针对终端进行优化
 // Email->lqkisme@163.com
 // Author : lqkisme
 
