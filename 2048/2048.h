@@ -11,9 +11,9 @@ public:
 	int Scroe = 0;//初始分数 
 	bool ADD = false;//是否添加棋子
 	int BoardList[4][4] = { 0 };
-	string Tips;
+	string Tips;//提示信息
 
-	Game();
+	Game();// 构造函数， 初始化一些参数
 	void Print(); //打印棋盘
 	bool Input();//获取输入
 	bool AddBoard();//添加棋子
