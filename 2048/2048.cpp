@@ -213,6 +213,7 @@ void Game::Up()
 	{
 		if (this->ADD)
 		{
+			Sleep(50);
 			this->AddBoard();
 			this->ADD = false;
 		}
@@ -276,6 +277,7 @@ void Game::Down()
 	{
 		if (this->ADD)
 		{
+			Sleep(50);
 			this->AddBoard();
 			this->ADD = false;
 		}
@@ -344,6 +346,7 @@ void Game::Left()
 	{
 		if (this->ADD)
 		{
+			Sleep(50);
 			this->AddBoard();
 			this->ADD = false;
 		}
@@ -407,6 +410,7 @@ void Game::Right()
 	{
 		if (this->ADD)
 		{
+			Sleep(50);
 			this->AddBoard();
 			this->ADD = false;
 		}
@@ -425,6 +429,7 @@ void Game::Restart()
 			this->BoardList[i][j] =0;
 		}
 	}
+	Sleep(50);
 	this->AddBoard();
 	this->AddBoard();
 }
